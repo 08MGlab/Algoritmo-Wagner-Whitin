@@ -24,32 +24,28 @@ Wagner-Whitin-Algorithm (main)
 - 🔧 **wagner_whitin.py** # Implementación del algoritmo
 - 📚 **referencias/** # Bibliografía y recursos
 - 📖 **README.md** # Este archivo
-🎓 Aportes Académicos
+## 🎓 Aportes Académicos
 Este trabajo contribuye con:
 
-Exposición pedagógica del algoritmo Wagner-Whitin en español
+- **Exposición pedagógica del algoritmo Wagner-Whitin en español**
 
-Demostraciones completas de los teoremas fundamentales
+- **Implementación computacional eficiente**
 
-Implementación computacional eficiente
+- **Análisis de complejidad y optimizaciones**
 
-Análisis de complejidad y optimizaciones
+## 📚 Referencias
+- **Wagner, H. M. & Whitin, T. M. (1958). Dynamic Version of the Economic Lot Size Model**
 
-Ejemplos numéricos detallados
+- **Bellman, R. (1957). Dynamic Programming**
 
-📚 Referencias
-Wagner, H. M. & Whitin, T. M. (1958). Dynamic Version of the Economic Lot Size Model
+- **Aksoy, A. & Kucukyavuz, S. (2024). Robust Lot-Sizing Problems with Uncertain Costs**
 
-Bellman, R. (1957). Dynamic Programming
-
-Aksoy, A. & Kucukyavuz, S. (2024). Robust Lot-Sizing Problems with Uncertain Costs
-
-👨‍💻 Autor
+## 👨‍💻 Autor
 Martin Rojas Medrano
 🎓 Estudiante de Matemática - Universidad Nacional de Ingeniería (Lima, Perú)
 
 https://img.shields.io/badge/Email-martin.rojas.m@uni.pe-red?style=flat&logo=gmail
-📄 Licencia
+## 📄 Licencia
 Este proyecto está bajo la Licencia Creative Commons Attribution-NonCommercial 4.0 International.
 
 ⭐ ¿Te resulta útil este proyecto? ¡No dudes en darle una estrella al repositorio!
