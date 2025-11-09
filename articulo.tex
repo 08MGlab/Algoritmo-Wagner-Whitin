@@ -1,4 +1,4 @@
-\documentclass[10pt]{article}
+\documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[spanish]{babel}
 \usepackage{amsmath, amssymb, amsthm}
@@ -19,15 +19,16 @@
 \newtheorem{corollary}{Corolario}
 \newtheorem{proposition}{Proposición}
 \newtheorem{remark}{Observación}
-
+\newtheorem{example}{Ejemplo}
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-Este artículo presenta una exposición exhaustiva del algoritmo Wagner-Whitin para la solución óptima del problema de dimensionamiento de lotes con demanda dinámica y determinística. Partiendo del artículo fundacional de Wagner y Whitin (1958), se desarrolla el marco teórico del modelo, se demuestran los teoremas fundamentales que sustentan el algoritmo, se describe el procedimiento computacional y se ilustra con ejemplos numéricos. El análisis revela la conexión entre la programación dinámica y la gestión de inventarios, destacando el concepto de horizonte de planificación como herramienta para reducir la complejidad computacional. Se incluyen definiciones formales de los conceptos clave y se discuten extensiones modernas del modelo.
+Este artículo presenta una exposición exhaustiva del algoritmo Wagner-Whitin para la solución óptima del problema de dimensiona\-miento de lotes con demanda dinámica y determinística. 
+Partiendo del artículo fundacional de Wagner y Whitin (1958), se desarrolla el marco teórico del modelo, se demuestran los teoremas fundamentales que sustentan el algoritmo, se describe el procedimiento computacional y se ilustra con ejemplos numéricos. 
+El análisis revela la conexión entre la programa\-ción dinámica y la gestión de inventarios, destacando el concepto de horizonte de planificación como herramienta para reducir la complejidad computacional. Se incluyen definiciones formales de los conceptos clave y se discuten extensiones modernas del modelo.
 \end{abstract}
-
 \section{Introducción}
 El problema de dimensionamiento de lotes (\textit{lot sizing}) constituye uno de los problemas fundamentales en la gestión de inventarios. Mientras que el modelo económico clásico (\textit{Economic Order Quantity - EOQ}) supone una demanda constante a través del tiempo, en entornos reales la demanda frecuentemente exhibe variaciones significativas entre periodos. 
 
@@ -78,6 +79,7 @@ TC^* = \sqrt{2DSH}
 \]
 
 Sin embargo, el modelo EOQ resulta inadecuado cuando la demanda varía significativamente entre periodos, lo que motiva el desarrollo de modelos dinámicos como el de Wagner-Whitin.
+\end{definition}
 \subsection{Programación Dinámica}
 
 El algoritmo Wagner-Whitin se fundamenta en la programación dinámica, técnica desarrollada por Richard Bellman.
@@ -88,7 +90,7 @@ El algoritmo Wagner-Whitin se fundamenta en la programación dinámica, técnica
 
 \begin{definition}
 (Problema de Optimización en Etapas). Un problema de optimización en etapas (o de programación dinámica) consiste en encontrar una secuencia de decisiones óptimas a lo largo de un horizonte finito de \( T \) etapas. Formalmente, se define mediante los siguientes elementos:
-
+\newline
 \textbf{Horizonte temporal}: \( t = 1, 2, \dots, T \) Momentos discretos en los que se toman decisiones. Cada etapa t corresponde a un subproblema.
 \newline
 \textbf{Estado del sistema $s_t$ $\in$ $S_t$}: Describe la situación del sistema al inicio de la etapa 
@@ -98,8 +100,10 @@ t.
 \textbf{Decisión o control}: \( x_t \in X_t(s_t) \), donde \( X_t(s_t) \) es el conjunto de decisiones factibles en el estado \( s_t \)
 \newline
 \textbf{Función de transición}: \( s_{t+1} = g_t(s_t, x_t) \), determina como evoluciona el sistema al tomar decisión $x_t$ en el estado $s_t$.
-- **Costo inmediato**: \( c_t(x_t, u_t) \), costo incurrido en la etapa \( t \)
-- **Costo terminal**: \( V_{T+1}(x_{T+1}) \), costo asociado al estado final (usualmente 0)
+\newline
+\textbf{Costo inmediato}: \( c_t(x_t, u_t) \), costo incurrido en la etapa \( t \)
+\newline
+\textbf{Costo terminal}: \( V_{T+1}(x_{T+1}) \), costo asociado al estado final (usualmente 0)
 
 El objetivo es encontrar una política \( \pi = (u_1, u_2, \dots, u_T) \) que minimice el costo total esperado:
 
@@ -107,16 +111,39 @@ El objetivo es encontrar una política \( \pi = (u_1, u_2, \dots, u_T) \) que mi
 J_\pi(x_1) = \sum_{t=1}^{T} c_t(x_t, u_t) + V_{T+1}(x_{T+1})
 \]
 \end{definition}
-\begin{definition}[Ecuación de Bellman]
-Para un problema de optimización en etapas, la ecuación de Bellman establece:
+\begin{definition}[Ecuación de Bellman para Gestión de Inventarios]
+En el contexto del problema de dimensionamiento de lotes, la ecuación de Bellman describe la política óptima de decisión periodo a periodo. Para cada instante $t = 1, 2, \ldots, N$:
+
 \begin{equation}
-V_t(x_t) = \min_{u_t \in U_t} \left[ c_t(x_t, u_t) + V_{t+1}(f_t(x_t, u_t)) \right]
+f_t(I) = \min_{x_t \geq 0} \left\{ 
+\begin{array}{ll}
+h_{t-1} \cdot I + \delta(x_t) \cdot s_t + f_{t+1}(I + x_t - d_t) & \text{si } I + x_t \geq d_t \\
+\infty & \text{en otro caso}
+\end{array}
+\right.
 \end{equation}
-donde $V_t(x_t)$ es la función valor en el estado $x_t$ en el tiempo $t$, $u_t$ es la decisión, y $c_t$ es el costo inmediato.
+
+donde:
+\begin{itemize}
+    \item $f_t(I)$: \textbf{Función de Bellman} en el periodo $t$ con inventario inicial $I$, que representa el \textit{costo mínimo acumulado desde $t$ hasta el horizonte $N$}
+    \item $t$: \textbf{Índice temporal} que varía en $1 \leq t \leq N$ (periodos discretos)
+    \item $I$: \textbf{Nivel de inventario} al inicio del periodo $t$
+    \item $x_t$: \textbf{Cantidad a ordenar} en el periodo $t$ (variable de decisión)
+    \item $h_{t-1}$: \textbf{Costo unitario de mantenimiento} del periodo $t-1$ a $t$
+    \item $\delta(x_t)$: \textbf{Función indicadora} de orden ($\delta(x_t) = 1$ si $x_t > 0$, $0$ en otro caso)
+    \item $s_t$: \textbf{Costo fijo de ordenar} en el periodo $t$
+    \item $d_t$: \textbf{Demanda} en el periodo $t$
+\end{itemize}
+
+La \textbf{condición terminal} completa la definición recursiva:
+\begin{equation}
+f_{N+1}(I) = \begin{cases} 
+0 & \text{si } I = 0 \\
+\infty & \text{si } I > 0
+\end{cases}
+\quad \text{para todo } I \geq 0
+\end{equation}
 \end{definition}
-
-Este principio permite descomponer el problema de $N$ periodos en una secuencia de problemas más simples, cada uno dependiente solamente del estado del sistema (nivel de inventario) y las decisiones futuras.
-
 \subsection{Optimización Convexa y Estructuras Especiales}
 
 Aunque el problema de Wagner-Whitin incluye costos fijos (no convexos), la estructura especial del problema permite encontrar soluciones óptimas globales.
@@ -132,37 +159,84 @@ f(\lambda x + (1-\lambda)y) \leq \lambda f(x) + (1-\lambda)f(y)
 Una función $f: \mathbb{R}^n \rightarrow \mathbb{R}$ es cóncava si $-f$ es convexa.
 \end{definition}
 
-\begin{theorem}[Optimalidad en Problemas Convexos]
-En un problema de minimización convexa, todo mínimo local es global.
-\end{theorem}
+La formulación de Wagner-Whitin, aunque no estrictamente convexa debido a la presencia de costos fijos discontinuos, exhibe propiedades estructurales que garantizan la optimalidad global de la solución encontrada mediante programación dinámica. Estas propiedades fundamentales son:
 
-La formulación de Wagner-Whitin, aunque no completamente convexa debido a los costos fijos, exhibe propiedades estructurales que garantizan la optimalidad global de la solución encontrada.
+\begin{enumerate}
+    \item \textbf{Propiedad de Planificación de Cero Inventarios (Zero-Inventory Ordering):} 
+    En una política óptima, la ordenación ocurre únicamente cuando el nivel de inventario es cero. Formalmente, existe una solución óptima que satisface:
+    \begin{equation}
+        I_{t-1} \cdot x_t = 0 \quad \text{para todo } t = 1, \ldots, N
+    \end{equation}
+    donde $I_{t-1}$ es el inventario inicial del periodo $t$ y $x_t$ es la cantidad ordenada.
+    
+    \item \textbf{Estructura de Subproblemas Independientes:}
+    El problema de $N$ periodos se descompone en subproblemas más simples mediante el principio de optimalidad de Bellman. La función de valor $f_t(I)$ satisface:
+    \begin{equation}
+        f_t(I) = \min_{x_t \geq 0} \left\{ C_t(I, x_t) + f_{t+1}(I + x_t - d_t) \right\}
+    \end{equation}
+    donde $C_t(I, x_t)$ representa el costo inmediato en el periodo $t$.
+    
+    \item \textbf{Propiedad de Monotonicidad de la Función de Valor:}
+    La función de valor óptimo $f_t(I)$ es no decreciente en el inventario $I$ y no creciente en el tiempo $t$, lo que permite podar soluciones subóptimas durante la búsqueda.
+    
+    \item \textbf{Existencia de Puntos de Regeneración (Regeneration Points):}
+    Los periodos en los que el inventario se agota (puntos de regeneración) dividen el problema en subintervalos independientes, reduciendo la complejidad computacional de $O(2^N)$ a $O(N^2)$.
+\end{enumerate}
 
-\subsection{Planificación Horizontale}
+Estas propiedades garantizan que el algoritmo de Wagner-Whitin, basado en programación dinámica, encuentre la solución óptima global a pesar de la no convexidad introducida por los costos fijos. La optimalidad se demuestra mediante inducción hacia atrás sobre el horizonte de planificación, donde en cada etapa $t$ se garantiza que $f_t(I)$ representa el costo mínimo acumulado desde $t$ hasta el final.
+\subsection{Planificación Horizontal}
 
 Un concepto fundamental introducido por Wagner y Whitin es el de \textit{horizonte de planificación}, que permite dividir el problema en subproblemas independientes.
-
 \begin{definition}[Horizonte de Planificación]
 Un periodo $t$ constituye un horizonte de planificación si la solución óptima para los primeros $t$ periodos es independiente de los datos de demanda y costos más allá del periodo $t$.
+
+\textbf{Ejemplo:} Considere un problema con 4 periodos y demandas $d = [50, 60, 70, 80]$. Si al resolver el problema para 3 periodos encontramos que la última orden en la solución óptima ocurre en el periodo 3 (cubriendo $d_3$), entonces el periodo 3 es un horizonte de planificación. Las decisiones óptimas para los periodos 1-3 permanecen invariantes independientemente de la demanda del periodo 4.
 \end{definition}
 
 \begin{definition}[Propiedad de Extensibilidad]
 Un problema de planificación posee la propiedad de extensibilidad si la solución óptima para un horizonte $T$ puede extenderse a un horizonte $T+1$ sin modificar las decisiones anteriores.
+
+\textbf{Ejemplo:} Supongamos que para $T=3$ periodos la política óptima es:
+\begin{itemize}
+    \item Ordenar 110 unidades en $t=1$ (cubre $d_1=50$ y $d_2=60$)
+    \item Ordenar 70 unidades en $t=3$ (cubre $d_3=70$)
+\end{itemize}
+Si al agregar un cuarto periodo con $d_4=80$, la política óptima mantiene las mismas decisiones en $t=1$ y $t=3$, y simplemente añade una orden en $t=4$ para $d_4$, entonces el problema tiene la propiedad de extensibilidad.
 \end{definition}
 
-Este concepto tiene implicaciones prácticas significativas, pues permite tomar decisiones óptimas sin conocer el futuro completo.
+Estos conceptos tienen implicaciones prácticas significativas, pues permiten tomar decisiones óptimas sin conocer el futuro completo. En el algoritmo de Wagner-Whitin, la identificación de horizontes de planificación permite:
 
+\begin{example}[Aplicación en Wagner-Whitin]
+Considere un escenario con:
+\begin{align*}
+d &= [20, 50, 10, 30, 40] \\
+s &= [100, 100, 100, 100, 100] \quad \text{(costos fijos)} \\
+h &= [1, 1, 1, 1, 1] \quad \text{(costos de mantenimiento)}
+\end{align*}
+
+El algoritmo puede determinar que el periodo 2 es un horizonte de planificación, meaning que las decisiones óptimas para los periodos 1-2 no dependen de los periodos 3-5. Esto reduce el espacio de búsqueda y simplifica el cómputo.
+\end{example}
 \section{Modelo Matemático y Preliminares}
 
 \subsection{Definición Formal del Problema}
-Considérese un horizonte de planificación discreto de $N$ periodos. En cada periodo $t = 1, 2, \ldots, N$, se definen los siguientes parámetros y variables:
+Considérese un horizonte de planificación discreto de $N$ periodos. En cada periodo $t = 1, 2, \ldots, N$, se definen los siguientes elementos:
 
+\noindent \textbf{Parámetros del problema (datos conocidos):}
 \begin{itemize}
-    \item $d_t$: demanda en el periodo $t$
-    \item $s_t$: costo de setup (ordenar o producir) en el periodo $t$
-    \item $h_t$: costo de mantener una unidad en inventario del periodo $t$ al $t+1$
-    \item $x_t$: cantidad a ordenar (o producir) en el periodo $t$
-    \item $I_t$: inventario al final del periodo $t$
+    \item $d_t$: demanda en el periodo $t$ (unidades)
+    \item $s_t$: costo fijo de setup (ordenar o producir) en el periodo $t$ (\$)
+    \item $h_t$: costo unitario de mantener inventario del periodo $t$ al $t+1$ (\$/unidad/periodo)
+\end{itemize}
+
+\noindent \textbf{Variables de decisión:}
+\begin{itemize}
+    \item $x_t$: cantidad a ordenar (o producir) en el periodo $t$ (unidades)
+    \item $I_t$: nivel de inventario al final del periodo $t$ (unidades)
+\end{itemize}
+
+\noindent \textbf{Función auxiliar:}
+\begin{itemize}
+    \item $\delta(x_t)$: función indicadora que toma valor 1 si $x_t > 0$ y 0 en caso contrario
 \end{itemize}
 
 \begin{definition}[Problema de Dimensionamiento de Lotes con Demanda Dinámica]
@@ -194,7 +268,8 @@ donde $M$ es una constante suficientemente grande (e.g., $M = \sum_{i=t}^N d_i$)
 
 \subsection{Formulación como Programación Dinámica}
 
-El problema puede formularse recursivamente mediante programación dinámica. Sea $f_t(I)$ el costo mínimo acumulado desde el periodo $t$ hasta el final, dado un inventario inicial $I$ al comienzo del periodo $t$:
+El problema puede formularse recur\-sivamente mediante progra\-mación dinámica. 
+Sea $f_t(I)$ el costo mínimo acumulado desde el periodo $t$ hasta el final, dado un inventario inicial $I$ al comienzo del periodo $t$:
 
 \begin{equation}
 f_t(I) = \min_{\substack{x_t \geq 0 \\ I + x_t \geq d_t}} \left[ h_{t-1} I + \delta(x_t) s_t + f_{t+1}(I + x_t - d_t) \right]
@@ -209,8 +284,7 @@ f_{N+1}(I) = \begin{cases}
 \end{cases}
 \end{equation}
 
-Aunque esta formulación es correcta, su implementación directa resulta computacionalmente costosa. Los teoremas fundamentales presentados a continuación permiten simplificar notablemente el problema.
-
+Aunque esta formulación es correcta, su implementación directa resulta computacional\-mente costosa. Los teoremas fundamentales presentados a continuación permiten simplificar notable\-mente el problema.
 \section{Resultados del articulo base}
 
 Los siguientes teoremas, demostrados originalmente por Wagner y Whitin, establecen propiedades estructurales de la solución óptima que reducen drásticamente el espacio de búsqueda.
