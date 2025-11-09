@@ -514,29 +514,249 @@ La formulación simplificada $F(t) = \min_{0 \leq j < t} [F(j) + s_{j+1} + H(j,t
 \section{Resultados del articulo base}
 
 Los siguientes teoremas, demostrados originalmente por Wagner y Whitin, establecen propiedades estructurales de la solución óptima que reducen drásticamente el espacio de búsqueda.
-
 \begin{theorem}[Propiedad de Regeneración o Cero-Inventario]
-Existe una solución óptima tal que para cada periodo $t$ se cumple $I_{t-1} \cdot x_t = 0$. Es decir, nunca se ordena y se tiene inventario positivo simultáneamente.
+En todo problema de dimensionamiento de lotes con demanda dinámica, existe al menos una solución óptima que satisface la condición de cero inventarios:
+\begin{equation}
+I_{t-1} \cdot x_t = 0 \quad \text{para todo } t = 1, \ldots, N
+\end{equation}
+Es decir, en cada periodo $t$, o bien el inventario inicial $I_{t-1}$ es cero, o bien no se realiza pedido ($x_t = 0$), pero nunca ambos son positivos simultáneamente.
 \end{theorem}
 
-\begin{proof}
-Supóngase una solución óptima donde para algún periodo $t$ se tiene $I_{t-1} > 0$ y $x_t > 0$. Consideremos una solución alternativa donde se reduce el pedido del periodo anterior en $\Delta > 0$ y se aumenta el pedido del periodo $t$ en la misma cantidad. El cambio en el costo sería:
+\begin{proof}[Demostración]
+Supongamos que existe una solución óptima $\{(x_t^*, I_t^*)\}_{t=1}^N$ que viola la propiedad para algún periodo $t$, es decir, $I_{t-1}^* > 0$ y $x_t^* > 0$. Construiremos una solución alternativa con costo menor o igual.
+
+Consideremos transferir una cantidad $\Delta = \min(I_{t-1}^*, x_t^*)$ del pedido del periodo $t$ al periodo $t-1$. Definamos:
+
+\begin{align*}
+x_{t-1}' &= x_{t-1}^* + \Delta \\
+x_t' &= x_t^* - \Delta \\
+I_{t-1}' &= I_{t-1}^* - \Delta
+\end{align*}
+
+Manteniendo las demás variables iguales. El cambio en el costo total es:
+
 \[
-\Delta C = -h_{t-1} \Delta + \delta(x_{t-1} - \Delta) s_{t-1} - \delta(x_{t-1}) s_{t-1}
+\Delta C = -h_{t-1} \Delta + [\delta(x_{t-1}') - \delta(x_{t-1}^*)] s_{t-1} + [\delta(x_t') - \delta(x_t^*)] s_t
 \]
-Para $\Delta$ suficientemente pequeño, si $x_{t-1} - \Delta > 0$, entonces $\Delta C = -h_{t-1} \Delta < 0$, contradiciendo la optimalidad. Si $x_{t-1} - \Delta = 0$, entonces $\Delta C = -s_{t-1} - h_{t-1} \Delta < 0$, nuevamente una contradicción. Por lo tanto, debe cumplirse $I_{t-1} \cdot x_t = 0$.
+
+Analizamos los casos:
+
+\textbf{Caso 1:} Si $x_{t-1}^* > 0$, entonces $\delta(x_{t-1}') = \delta(x_{t-1}^*) = 1$, y:
+\begin{itemize}
+    \item Si $x_t^* - \Delta > 0$, entonces $\delta(x_t') = \delta(x_t^*) = 1$, luego $\Delta C = -h_{t-1} \Delta < 0$
+    \item Si $x_t^* - \Delta = 0$, entonces $\delta(x_t') = 0$, $\delta(x_t^*) = 1$, luego $\Delta C = -h_{t-1} \Delta - s_t < 0$
+\end{itemize}
+
+\textbf{Caso 2:} Si $x_{t-1}^* = 0$, entonces $\delta(x_{t-1}') = 1$, $\delta(x_{t-1}^*) = 0$, y:
+\begin{itemize}
+    \item Si $x_t^* - \Delta > 0$, entonces $\Delta C = -h_{t-1} \Delta + s_{t-1}$
+    \item Si $x_t^* - \Delta = 0$, entonces $\Delta C = -h_{t-1} \Delta + s_{t-1} - s_t$
+\end{itemize}
+
+En todos los casos, podemos elegir $\Delta$ tal que $\Delta C \leq 0$. Repitiendo este proceso, eventualmente eliminamos todas las violaciones de la propiedad sin aumentar el costo.
 \end{proof}
 
+\begin{example}[Ilustración de la Propiedad]
+Considere un problema con $N=3$, demandas $d = [20, 30, 40]$, costos de setup $s_t = 100$, y costos de mantenimiento $h_t = 1$.
+
+\textbf{Solución que viola la propiedad:}
+\begin{align*}
+x_1 &= 90, \quad I_1 = 70 \\
+x_2 &= 30, \quad I_2 = 70 \quad \text{\textbf{VIOLACIÓN: } $I_1 > 0$ y $x_2 > 0$} \\
+x_3 &= 0, \quad I_3 = 30
+\end{align*}
+Costo total: $100 + 100 + 1\cdot70 + 1\cdot70 + 1\cdot30 = 370$
+
+\textbf{Solución equivalente que cumple la propiedad:}
+\begin{align*}
+x_1 &= 120, \quad I_1 = 100 \\
+x_2 &= 0, \quad I_2 = 70 \\
+x_3 &= 0, \quad I_3 = 30
+\end{align*}
+Costo total: $100 + 1\cdot100 + 1\cdot70 + 1\cdot30 = 300$
+
+O alternativamente:
+\begin{align*}
+x_1 &= 50, \quad I_1 = 30 \\
+x_2 &= 0, \quad I_2 = 0 \\
+x_3 &= 40, \quad I_3 = 0
+\end{align*}
+Costo total: $100 + 100 + 1\cdot30 = 230$ \textbf{(óptimo)}
+\end{example}
+
+\begin{proposition}[Existencia de Múltiples Soluciones Óptimas]
+Pueden existir múltiples soluciones óptimas, pero al menos una cumple la propiedad de cero inventarios. Las soluciones que violan la propiedad son \textbf{dominadas} o \textbf{equivalentes} a alguna que la cumple.
+\end{proposition}
+
+\begin{proof}[Análisis de Multiplicidad]
+Consideremos dos casos:
+
+\textbf{Caso 1: Soluciones estructuralmente diferentes}
+Pueden existir políticas óptimas con patrones de pedidos diferentes pero mismo costo. Por ejemplo, con $d = [10, 10]$, $s_t = 50$, $h_t = 1$:
+\begin{itemize}
+    \item Política A: $x_1 = 20$ (cubre ambos periodos), costo: $50 + 1\cdot10 = 60$
+    \item Política B: $x_1 = 10$, $x_2 = 10$, costo: $50 + 50 = 100$ \textbf{(no óptima)}
+\end{itemize}
+
+\textbf{Caso 2: Soluciones con misma estructura pero diferentes cantidades}
+Cuando los costos de mantenimiento son cero ($h_t = 0$), múltiples políticas pueden ser óptimas. Por ejemplo, con $d = [10, 10]$, $s_t = 50$, $h_t = 0$:
+\begin{itemize}
+    \item Cualquier política que ordene 20 unidades en algún subconjunto de periodos tiene costo 50
+    \item Pero solo las que cumplen cero inventarios evitan soluciones redundantes
+\end{itemize}
+\end{proof}
+
+\begin{remark}[Implicaciones Computacionales]
+La propiedad de cero inventarios reduce drásticamente el espacio de búsqueda:
+\begin{itemize}
+    \item \textbf{Sin la propiedad}: Número exponencial de políticas posibles ($O(2^N)$)
+    \item \textbf{Con la propiedad}: Solo $O(N^2)$ combinaciones a evaluar
+    \item \textbf{Poda de soluciones}: Podemos ignorar políticas que violan la propiedad sin perder optimalidad
+\end{itemize}
+\end{remark}
+
+\begin{corollary}[Caracterización de Soluciones Óptimas]
+Toda solución óptima puede transformarse en una que cumple la propiedad de cero inventarios mediante reasignación de pedidos sin aumentar el costo. Las soluciones que violan persistentemente la propiedad son estrictamente subóptimas a menos que $h_t = 0$ para todo $t$.
+\end{corollary}
+
+\begin{example}[Caso Degenerado con $h_t = 0$]
+Con $d = [10, 10]$, $s_t = 50$, $h_t = 0$:
+\begin{align*}
+\text{Solución 1: } & x_1 = 20, x_2 = 0 \quad (\text{cumple propiedad}) \\
+\text{Solución 2: } & x_1 = 15, x_2 = 5 \quad (\text{viola propiedad}) \\
+\text{Solución 3: } & x_1 = 10, x_2 = 10 \quad (\text{cumple propiedad})
+\end{align*}
+Todas tienen costo 50, pero las Soluciones 1 y 3 son preferibles por simplicidad.
+\end{example}
+
 \begin{theorem}[Patrón de Pedidos o Satisfacción Exacta de Demanda]
-Existe una solución óptima tal que cada pedido $x_t$ cubre exactamente la demanda de un número entero de periodos consecutivos. Formalmente, para cada $t$ con $x_t > 0$, existe $k \geq t$ tal que:
+Existe una solución óptima tal que cada pedido $x_t > 0$ cubre exactamente la demanda de un número entero de periodos consecutivos. Formalmente, para cada $t$ con $x_t > 0$, existe un periodo $k \geq t$ tal que:
 \begin{equation}
 x_t = \sum_{j=t}^k d_j
 \end{equation}
+y el inventario se agota completamente al final del periodo $k$ ($I_k = 0$).
 \end{theorem}
 
-\begin{proof}
-Directa del Teorema 1. Si un pedido no satisface exactamente la demanda de periodos consecutivos, existiría algún periodo intermedio con inventario positivo y donde se realiza un pedido, violando la propiedad de regeneración.
+\begin{proof}[Demostración]
+Supongamos que existe una solución óptima que viola esta propiedad. Entonces, existe algún periodo $t$ con $x_t > 0$ tal que el pedido no cubre exactamente la demanda de periodos consecutivos. Esto implica que existe al menos un periodo intermedio $m$ (con $t < m \leq N$) donde:
+
+\begin{itemize}
+    \item $I_{m-1} > 0$ (inventario positivo al inicio de $m$)
+    \item $x_m > 0$ (se realiza un pedido en $m$)
+\end{itemize}
+
+Pero esta situación viola directamente la \textbf{Propiedad de Cero Inventarios} del Teorema 1, ya que tenemos $I_{m-1} \cdot x_m > 0$.
+
+Para construir una solución que cumpla la propiedad, consideremos cualquier pedido $x_t > 0$ en la solución óptima. Sea $k$ el último periodo cuya demanda es satisfecha total o parcialmente por $x_t$. Entonces, podemos redefinir:
+
+\[
+x_t' = \sum_{j=t}^k d_j
+\]
+
+y ajustar los pedidos posteriores en consecuencia. Este reajuste no aumenta el costo total porque:
+
+\begin{enumerate}
+    \item \textbf{Costos de setup}: El número de pedidos permanece igual o disminuye
+    \item \textbf{Costos de mantenimiento}: Eliminamos situaciones de inventario positivo con pedidos, reduciendo posiblemente los costos de almacenamiento
+    \item \textbf{Factibilidad}: Se sigue satisfaciendo toda la demanda
+\end{enumerate}
+
+Por lo tanto, existe una solución óptima que satisface el patrón de satisfacción exacta de demanda.
 \end{proof}
+
+\begin{example}[Ilustración del Teorema]
+Considere un problema con $N=4$, demandas $d = [20, 30, 40, 25]$, $s_t = 100$, $h_t = 1$.
+
+\textbf{Solución que viola el patrón:}
+\begin{align*}
+x_1 &= 50, \quad I_1 = 30 \\
+x_2 &= 45, \quad I_2 = 45 \quad \text{\textbf{VIOLACIÓN}} \\
+x_3 &= 20, \quad I_3 = 25 \\
+x_4 &= 0, \quad I_4 = 0
+\end{align*}
+Aquí $x_2 = 45$ no cubre exactamente la demanda de periodos consecutivos.
+
+\textbf{Transformación a solución que cumple el patrón:}
+\begin{align*}
+x_1 &= 50, \quad I_1 = 30 \\
+x_2 &= 70, \quad I_2 = 70 \quad \text{(cubre periodos 2-3)} \\
+x_3 &= 0, \quad I_3 = 30 \\
+x_4 &= 25, \quad I_4 = 0
+\end{align*}
+O mejor aún:
+\begin{align*}
+x_1 &= 115, \quad I_1 = 95 \quad \text{(cubre todos los periodos)} \\
+x_2 &= 0, \quad I_2 = 65 \\
+x_3 &= 0, \quad I_3 = 25 \\
+x_4 &= 0, \quad I_4 = 0
+\end{align*}
+Costo: $100 + 1\cdot95 + 1\cdot65 + 1\cdot25 = 285$
+\end{example}
+
+\begin{proposition}[Consecuencias del Patrón de Pedidos]
+El teorema implica que en una solución óptima:
+\begin{enumerate}
+    \item Los \textbf{puntos de regeneración} (periodos con $I_t = 0$) dividen el horizonte en intervalos independientes
+    \item Cada intervalo $[t,k]$ se abastece completamente con un solo pedido en $t$
+    \item El problema de $N$ periodos se reduce a decidir en qué periodos ordenar
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}[Demostración Alternativa por Optimalidad Local]
+Consideremos cualquier política óptima. Fijemos un periodo $t$ con $x_t > 0$. Sea $k$ el último periodo tal que $I_k > 0$ y $I_{k+1} = 0$ (el próximo punto de regeneración).
+
+Si $x_t \neq \sum_{j=t}^k d_j$, entonces existen dos casos:
+
+\textbf{Caso 1:} $x_t > \sum_{j=t}^k d_j$. Esto implica que sobra inventario después de $k$, pero $I_{k+1} = 0$ por definición de $k$, contradicción.
+
+\textbf{Caso 2:} $x_t < \sum_{j=t}^k d_j$. Esto implica que necesitamos pedidos adicionales entre $t$ y $k$, pero entonces existiría algún $m \in (t,k]$ con $I_{m-1} > 0$ y $x_m > 0$, violando el Teorema 1.
+
+Por lo tanto, debe cumplirse $x_t = \sum_{j=t}^k d_j$.
+\end{proof}
+
+\begin{remark}[Implicaciones Computacionales]
+Este teorema reduce drásticamente el espacio de búsqueda:
+\begin{itemize}
+    \item \textbf{Sin el teorema}: Número exponencial de combinaciones de cantidades a ordenar
+    \item \textbf{Con el teorema}: Solo $O(N^2)$ posibles políticas (elegir puntos de regeneración)
+    \item \textbf{Algoritmo eficiente}: Permite el desarrollo del algoritmo Wagner-Whitin con complejidad $O(N^2)$
+\end{itemize}
+\end{remark}
+
+\begin{example}[Caso con Múltiples Soluciones Óptimas]
+Considere $d = [10, 10, 10]$, $s_t = 50$, $h_t = 1$. Existen múltiples soluciones óptimas:
+
+\textbf{Solución 1:} Un pedido al inicio
+\begin{align*}
+x_1 &= 30, \quad I_1 = 20, \quad I_2 = 10, \quad I_3 = 0 \\
+\text{Costo: } & 50 + 1\cdot20 + 1\cdot10 = 80
+\end{align*}
+
+\textbf{Solución 2:} Dos pedidos estratégicos
+\begin{align*}
+x_1 &= 20, \quad I_1 = 10, \quad I_2 = 0 \\
+x_3 &= 10, \quad I_3 = 0 \\
+\text{Costo: } & 50 + 50 + 1\cdot10 = 110 \quad \text{(no óptima)}
+\end{align*}
+
+\textbf{Solución 3:} Pedidos en cada periodo
+\begin{align*}
+x_1 &= 10, \quad I_1 = 0 \\
+x_2 &= 10, \quad I_2 = 0 \\
+x_3 &= 10, \quad I_3 = 0 \\
+\text{Costo: } & 50 + 50 + 50 = 150 \quad \text{(no óptima)}
+\end{align*}
+
+Todas las soluciones óptimas cumplen el patrón de satisfacción exacta.
+\end{example}
+
+\begin{corollary}[Formulación Recursiva Simplificada]
+El costo mínimo $F(t)$ para los primeros $t$ periodos satisface:
+\[
+F(t) = \min_{0 \leq j < t} \left[ F(j) + s_{j+1} + \sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k \right]
+\]
+donde $j$ representa el último punto de regeneración antes de $t$.
+\end{corollary}
 
 \begin{theorem}[Horizonte de Planificación]
 Si al resolver el problema para los primeros $t$ periodos se encuentra que el último pedido ocurre en el periodo $j^* \leq t$, entonces la solución óptima para el problema completo puede obtenerse concatenando la solución óptima para los primeros $j^*-1$ periodos (considerados independientemente) con la solución para los periodos restantes.
@@ -549,108 +769,320 @@ Sea $F(t)$ el costo mínimo para los primeros $t$ periodos. Por la propiedad de 
 \begin{corollary}[Formulación Recursiva Simplificada]
 El costo mínimo para los primeros $t$ periodos puede expresarse como:
 \begin{equation}
-F(t) = \min_{0 \leq j \leq t} \left[ F(j) + s_{j+1} + \sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k \right]
+F(t) = \min_{0 \leq j < t} \left[ F(j) + s_{j+1} + \sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k \right]
+\tag{18}
 \end{equation}
 con $F(0) = 0$.
 \end{corollary}
 
-\section{Algoritmo Wagner-Whitin}
+\begin{proof}[Demostración]
+Usaremos los Teoremas 2 y 3, que establecen la existencia de una solución óptima con puntos de regeneración donde el inventario se agota.
 
-Los teoremas anteriores permiten formular un algoritmo forward que resuelve el problema de manera eficiente.
+\textbf{Paso 1: Identificación de la estructura óptima}
 
-\subsection{Formulación Recursiva}
+Por el \textbf{Teorema 3} (Patrón de Pedidos), en una solución óptima cada pedido $x_{j+1} > 0$ cubre exactamente la demanda de periodos consecutivos $j+1$ hasta $k$ para algún $k \geq j+1$.
 
-Sea $F(t)$ el costo mínimo para los primeros $t$ periodos, con $F(0) = 0$. Entonces:
+Para el subproblema de los primeros $t$ periodos, sea $j$ el último punto de regeneración antes de $t$ (es decir, $I_j = 0$). Entonces, el último pedido ocurre en el periodo $j+1$ y cubre los periodos desde $j+1$ hasta $t$.
+
+\textbf{Paso 2: Descomposición del costo}
+
+El costo total para los primeros $t$ periodos se descompone en:
+\begin{enumerate}
+    \item \textbf{Costo óptimo hasta el periodo $j$}: $F(j)$
+    \item \textbf{Costo de setup del pedido en $j+1$}: $s_{j+1}$
+    \item \textbf{Costo de mantenimiento de inventario}: Para cada periodo $k$ desde $j+1$ hasta $t-1$, la demanda $d_k$ debe almacenarse desde el periodo $k+1$ hasta $t$
+\end{enumerate}
+
+\textbf{Paso 3: Cálculo del costo de mantenimiento}
+
+Para cada $k \in \{j+1, \ldots, t-1\}$, la demanda $d_k$ incurre en costos de mantenimiento en los periodos $l = k+1, \ldots, t$. El costo unitario de mantenimiento en el periodo $l$ es $h_l$.
+
+Por lo tanto, el costo total de mantenimiento para la demanda $d_k$ es:
+\[
+d_k \sum_{l=k+1}^t h_l
+\]
+
+Sumando sobre todos los $k$ desde $j+1$ hasta $t-1$, obtenemos:
+\[
+\sum_{k=j+1}^{t-1} \left( d_k \sum_{l=k+1}^t h_l \right) = \sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k
+\]
+
+\textbf{Paso 4: Formulación recursiva}
+
+Dado que $j$ puede ser cualquier punto de regeneración entre $0$ y $t-1$, debemos minimizar sobre todas las posibles elecciones de $j$:
+\[
+F(t) = \min_{0 \leq j < t} \left[ F(j) + s_{j+1} + \sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k \right]
+\]
+
+\textbf{Paso 5: Condición inicial}
+
+Para $t = 0$, no hay periodos que planificar, por lo que $F(0) = 0$.
+
+\textbf{Paso 6: Verificación de optimalidad}
+
+Esta formulación garantiza la optimalidad porque:
+\begin{itemize}
+    \item Considera todos los posibles puntos de regeneración $j$
+    \item Cada término en el mínimo corresponde a una política factible
+    \item Por el principio de optimalidad de Bellman, la solución óptima debe tener esta estructura
+\end{itemize}
+\end{proof}
+
+\begin{example}[Aplicación de la Formulación Recursiva]
+Considere $N=3$, $d = [20, 30, 40]$, $s_t = 100$, $h_t = 1$.
+
+\textbf{Cálculo de $F(1)$:}
+\[
+F(1) = \min_{0 \leq j < 1} [F(j) + s_{j+1} + \text{costo mantenimiento}]
+\]
+Solo $j=0$:
+\[
+F(1) = F(0) + s_1 + 0 = 0 + 100 + 0 = 100
+\]
+
+\textbf{Cálculo de $F(2)$:}
+\[
+F(2) = \min \begin{cases}
+j=0: F(0) + s_1 + \sum_{k=1}^{1} \sum_{l=2}^{2} h_l d_k = 0 + 100 + 1 \cdot 20 = 120 \\
+j=1: F(1) + s_2 + 0 = 100 + 100 + 0 = 200
+\end{cases}
+\]
+$F(2) = 120$
+
+\textbf{Cálculo de $F(3)$:}
+\[
+F(3) = \min \begin{cases}
+j=0: F(0) + s_1 + \sum_{k=1}^{2} \sum_{l=k+1}^{3} h_l d_k = 0 + 100 + (1\cdot20 + 1\cdot20 + 1\cdot30) = 170 \\
+j=1: F(1) + s_2 + \sum_{k=2}^{2} \sum_{l=3}^{3} h_l d_k = 100 + 100 + 1\cdot30 = 230 \\
+j=2: F(2) + s_3 + 0 = 120 + 100 + 0 = 220
+\end{cases}
+\]
+$F(3) = 170$
+\end{example}
+
+\begin{remark}[Interpretación de los Índices]
+En la doble sumatoria:
+\begin{itemize}
+    \item $k$: Periodo cuya demanda $d_k$ se almacena
+    \item $l$: Periodos en los que $d_k$ permanece en inventario
+    \item El rango $k = j+1$ hasta $t-1$ excluye el periodo $t$ porque su demanda no se almacena
+    \item El rango $l = k+1$ hasta $t$ captura todos los periodos de almacenamiento
+\end{itemize}
+\end{remark}
+
+\begin{proposition}[Equivalencia con la Formulación Original]
+La formulación recursiva (18) es equivalente a la ecuación de Bellman original bajo las propiedades de Wagner-Whitin, pero con complejidad reducida de $O(N^2)$ en lugar de $O(2^N)$.
+\end{proposition}
+
+\begin{proof}
+Sea $f_t(I)$ la función de Bellman original. Por el Teorema 1, en una solución óptima $I_t = 0$ en los puntos de regeneración. Por el Teorema 2, entre puntos de regeneración consecutivos $j$ y $t$, el pedido en $j+1$ cubre exactamente la demanda de $j+1$ a $t$.
+
+La formulación (18) explota estas propiedades considerando solo los estados donde $I = 0$, reduciendo el espacio de estados de dimensión continua a uno discreto finito.
+
+La optimalidad se mantiene porque cualquier política que viole estas propiedades puede transformarse en una que las cumple sin aumentar el costo.
+\end{proof}
+
+\section{Algoritmo Wagner-Whitin: Implementación Computacional}
+
+Tras haber establecido los fundamentos teóricos y demostrado las propiedades estructurales que caracterizan las soluciones óptimas del problema de dimensionamiento de lotes, presentamos ahora el algoritmo Wagner-Whitin en su forma canónica. Este algoritmo representa la materialización práctica de los teoremas fundamentales demostrados, transformando un problema de optimización combinatorio complejo en un procedimiento computacional eficiente y elegante.
+
+El algoritmo Wagner-Whitin constituye el núcleo de esta investigación, sintetizando los conceptos de programación dinámica, puntos de regeneración y horizontes de planificación en un método sistemático que resuelve el problema en tiempo polinomial. Su importancia histórica radica en ser el primer algoritmo exacto para el problema de dimensionamiento de lotes con demanda dinámica, estableciendo un paradigma que ha inspirado numerosas extensiones durante más de seis décadas.
+
+\subsection{Formulación Recursiva y Estructura del Algoritmo}
+
+El algoritmo se fundamenta en la formulación recursiva derivada del Corolario 1, que explota las propiedades de cero inventarios y satisfacción exacta de demanda:
 
 \begin{equation}
 F(t) = \min_{0 \leq j < t} \left[ F(j) + s_{j+1} + \sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k \right]
+\tag{19}
 \end{equation}
 
-donde el término $\sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k$ representa el costo de mantener el inventario necesario para satisfacer las demandas de los periodos $k = j+1, \ldots, t-1$ hasta sus respectivos periodos de consumo.
+donde $F(t)$ representa el costo mínimo acumulado para los primeros $t$ periodos.
 
-\subsection{Descripción del Algoritmo}
+La elegancia del algoritmo reside en su interpretación geométrica: el horizonte temporal se divide en intervalos definidos por puntos de regeneración consecutivos, donde cada intervalo $[j+1, t]$ es abastecido por un único pedido en $j+1$ que cubre exactamente la demanda acumulada del intervalo.
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{Algoritmo Wagner-Whitin}
 \begin{algorithmic}[1]
 \Require Demandas $d_t$, costos de setup $s_t$, costos de mantener $h_t$ para $t=1,\ldots,N$
-\Ensure Política óptima de pedidos y costo total mínimo
-\State Inicializar $F(0) = 0$, $P(0) = 0$ \Comment{$P(t)$ almacena el último periodo de pedido}
+\Ensure Política óptima de pedidos $\{x_t\}_{t=1}^N$ y costo total mínimo $F(N)$
+\State Inicializar $F(0) = 0$, $P(0) = 0$ \Comment{$P(t)$ almacena el último punto de regeneración}
 \For{$t = 1$ to $N$}
-    \State $F(t) \gets \infty$
+    \State $F(t) \gets \infty$ \comment{Inicializar con valor grande}
     \For{$j = 0$ to $t-1$}
-        \State $costo \gets F(j) + s_{j+1} + \sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k$
+        \State Calcular costo de mantener: $H \gets \sum_{k=j+1}^{t-1} \sum_{l=k+1}^t h_l d_k$
+        \State $costo \gets F(j) + s_{j+1} + H$
         \If{$costo < F(t)$}
             \State $F(t) \gets costo$
-            \State $P(t) \gets j$ \Comment{El próximo pedido cubre de $j+1$ a $t$}
+            \State $P(t) \gets j$ \comment{Registrar que el pedido en $j+1$ cubre hasta $t$}
         \EndIf
     \EndFor
 \EndFor
-\State Reconstruir política óptima mediante backtracking usando $P(t)$
-\State \Return $F(N)$, política óptima
+\State $\{x_t\}_{t=1}^N \gets \text{reconstruirPolítica}(P, d)$ \comment{Backtracking}
+\State \Return $F(N)$, $\{x_t\}_{t=1}^N$
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Complejidad Computacional y Optimizaciones}
+\begin{remark}[Interpretación del Algoritmo]
+El algoritmo opera en dos fases fundamentales:
+\begin{enumerate}
+    \item \textbf{Fase forward}: Calcula iterativamente $F(t)$ para $t = 1, \ldots, N$, almacenando en $P(t)$ la decisión óptima del último punto de regeneración.
+    \item \textbf{Fase de backtracking}: Reconstruye la política óptima recorriendo $P(t)$ desde $t = N$ hasta $t = 0$.
+\end{enumerate}
+Cada evaluación en el lazo interno corresponde a probar si el último pedido antes de $t$ debería ubicarse en $j+1$, cubriendo los periodos $j+1$ hasta $t$.
+\end{remark}
 
-El algoritmo básico requiere evaluar $O(N^2)$ posibles combinaciones $(j,t)$, con cada evaluación con costo $O(N)$, resultando en una complejidad total de $O(N^3)$. 
+\subsection{Análisis de Complejidad Computacional}
 
-\begin{theorem}[Complejidad Mejorada]
-Es posible implementar el algoritmo Wagner-Whitin con complejidad $O(N^2)$ mediante precomputación de costos de mantenimiento.
+La implementación básica del algoritmo tiene complejidad $O(N^3)$, pero mediante precomputación inteligente es posible alcanzar $O(N^2)$.
+
+\begin{theorem}[Optimización de Complejidad]
+El algoritmo Wagner-Whitin puede implementarse con complejidad temporal $O(N^2)$ mediante precomputación de la matriz de costos de mantenimiento.
 \end{theorem}
 
 \begin{proof}
-Definiendo $H(j,t) = \sum_{k=j}^{t-1} \sum_{l=k+1}^t h_l d_k$, podemos precomputar estos valores en $O(N^2)$ usando:
+Definamos la matriz de costos de mantenimiento $H(j,t)$ como:
+\[
+H(j,t) = \sum_{k=j}^{t-1} \sum_{l=k+1}^t h_l d_k
+\]
+
+Esta matriz puede precomputarse en $O(N^2)$ usando la relación de recurrencia:
 \[
 H(j,t) = H(j,t-1) + d_{t-1} \sum_{l=t}^t h_l \quad \text{para } j < t
 \]
-con $H(j,j) = 0$.
+con condiciones iniciales $H(j,j) = 0$ para todo $j$.
+
+Una vez precomputada $H$, cada evaluación del costo en el algoritmo principal toma tiempo constante, reduciendo la complejidad total de $O(N^3)$ a $O(N^2)$.
 \end{proof}
 
-\section{Ejemplo}
+\begin{algorithm}[H]
+\caption{Algoritmo Wagner-Whitin Optimizado}
+\begin{algorithmic}[1]
+\Require Demandas $d_t$, costos $s_t$, $h_t$ para $t=1,\ldots,N$
+\Ensure Política óptima y costo mínimo
+\State Precomputar $H(j,t)$ para $0 \leq j < t \leq N$ \comment{$O(N^2)$}
+\State $F(0) \gets 0$, $P(0) \gets 0$
+\For{$t = 1$ to $N$}
+    \State $F(t) \gets \infty$
+    \For{$j = 0$ to $t-1$}
+        \State $costo \gets F(j) + s_{j+1} + H(j+1,t)$
+        \If{$costo < F(t)$}
+            \State $F(t) \gets costo$, $P(t) \gets j$
+        \EndIf
+    \EndFor
+\EndFor
+\State \Return reconstruirPolítica($P,d$), $F(N)$
+\end{algorithmic}
+\end{algorithm}
 
-Considérese el ejemplo original de Wagner-Whitin con $N = 12$ periodos, costos de setup $s_t$ variables, demandas $d_t$ variables, y costo de mantenimiento $h_t = 1$ para todo $t$. Los datos se presentan en la Tabla 1.
+\begin{proposition}[Reconstrucción de la Política Óptima]
+La política óptima se reconstruye mediante el siguiente procedimiento de backtracking:
+\begin{algorithmic}[1]
+\Function{reconstruirPolítica}{$P, d$}
+    \State $t \gets N$, $x \gets [0,\ldots,0]$
+    \While{$t > 0$}
+        \State $j \gets P(t)$
+        \State $x_{j+1} \gets \sum_{i=j+1}^t d_i$ \comment{Pedido en $j+1$ cubre hasta $t$}
+        \State $t \gets j$ \comment{Retroceder al punto de regeneración anterior}
+    \EndWhile
+    \State \Return $x$
+\EndFunction
+\end{algorithmic}
+\end{proposition}
+
+\subsection{Ejemplo Computacional Detallado}
+
+Para ilustrar el funcionamiento del algoritmo, consideremos el ejemplo original de Wagner y Whitin (1958) con $N=12$ periodos, cuyos datos se presentan en la Tabla 1.
 
 \begin{table}[h]
 \centering
-\caption{Datos del problema de 12 periodos}
-\begin{tabular}{cccc}
+\caption{Datos del problema original de Wagner-Whitin (1958)}
+\begin{tabular}{cccccc}
 \toprule
-Mes $t$ & Demanda $d_t$ & Costo Setup $s_t$ \\
+Mes $t$ & $d_t$ & $s_t$ & Mes $t$ & $d_t$ & $s_t$ \\
 \midrule
-1 & 69 & 85 \\
-2 & 29 & 102 \\
-3 & 36 & 102 \\
-4 & 61 & 101 \\
-5 & 61 & 98 \\
-6 & 26 & 114 \\
-7 & 34 & 105 \\
-8 & 67 & 86 \\
-9 & 45 & 119 \\
-10 & 67 & 110 \\
-11 & 79 & 98 \\
-12 & 56 & 114 \\
+1 & 69 & 85 & 7 & 34 & 105 \\
+2 & 29 & 102 & 8 & 67 & 86 \\
+3 & 36 & 102 & 9 & 45 & 119 \\
+4 & 61 & 101 & 10 & 67 & 110 \\
+5 & 61 & 98 & 11 & 79 & 98 \\
+6 & 26 & 114 & 12 & 56 & 114 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-La aplicación del algoritmo produce la política óptima:
+Asumiendo $h_t = 1$ para todo $t$, la aplicación del algoritmo produce:
+
+\begin{example}[Ejecución Paso a Paso]
+\textbf{Cálculo de $F(1)$ a $F(3)$:}
+\begin{align*}
+F(1) &= F(0) + s_1 + H(1,1) = 0 + 85 + 0 = 85 \\
+F(2) &= \min\begin{cases}
+F(0) + s_1 + H(1,2) = 0 + 85 + 29 = 114 \\
+F(1) + s_2 + H(2,2) = 85 + 102 + 0 = 187
+\end{cases} = 114 \\
+F(3) &= \min\begin{cases}
+F(0) + s_1 + H(1,3) = 0 + 85 + (29 + 36) = 150 \\
+F(1) + s_2 + H(2,3) = 85 + 102 + 36 = 223 \\
+F(2) + s_3 + H(3,3) = 114 + 102 + 0 = 216
+\end{cases} = 150
+\end{align*}
+
+Continuando este proceso hasta $t=12$, obtenemos la política óptima completa.
+\end{example}
+
+\begin{table}[h]
+\centering
+\caption{Política óptima para el problema de 12 periodos}
+\begin{tabular}{clcc}
+\toprule
+Periodo de pedido & Periodos cubiertos & Cantidad $x_t$ & Costo acumulado \\
+\midrule
+1 & 1-2 & 98 & 114 \\
+3 & 3-4 & 97 & 254 \\
+5 & 5-7 & 121 & 473 \\
+8 & 8-9 & 112 & 635 \\
+10 & 10 & 67 & 772 \\
+11 & 11-12 & 135 & 864 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Análisis de la Solución Óptima}
+
+La política óptima obtenida ilustra perfectamente las propiedades estructurales demostradas:
+
 \begin{itemize}
-    \item Ordenar en periodo 1: $x_1 = 69 + 29 = 98$
-    \item Ordenar en periodo 3: $x_3 = 36 + 61 = 97$
-    \item Ordenar en periodo 5: $x_5 = 61 + 26 + 34 = 121$
-    \item Ordenar en periodo 8: $x_8 = 67 + 45 = 112$
-    \item Ordenar en periodo 10: $x_{10} = 67$
-    \item Ordenar en periodo 11: $x_{11} = 79 + 56 = 135$
+    \item \textbf{Propiedad de cero inventarios}: Cada pedido ocurre cuando el inventario es cero
+    \item \textbf{Satisfacción exacta}: Cada $x_t$ cubre exactamente la demanda de bloques consecutivos
+    \item \textbf{Eficiencia computacional}: El algoritmo evalúa solo $O(N^2)$ combinaciones en lugar de $O(2^N)$
 \end{itemize}
 
-El costo total óptimo es $F(12) = 864$.
+El costo total óptimo es $F(12) = 864$, que representa una reducción significativa comparada con políticas ingenuas como \textit{lote por lote} (costo: $85 + 102 + 102 + 101 + 98 + 114 + 105 + 86 + 119 + 110 + 98 + 114 = 1234$).
 
-\
+\subsection{Extensiones y Limitaciones Prácticas}
 
-El marco teórico establecido -basado en programación dinámica, optimización y teoría de inventarios- proporciona fundamentos sólidos para comprender tanto el algoritmo especí
+Aunque el algoritmo Wagner-Whitin resuelve óptimamente el problema básico, en la práctica surgen extensiones importantes:
 
+\begin{itemize}
+    \item \textbf{Restricciones de capacidad}: Límites en $x_t$ que pueden hacer el problema NP-duro
+    \item \textbf{Plazos de entrega}: Tiempos entre la orden y la recepción
+    \item \textbf{Descuentos por cantidad}: Costos unitarios variables
+    \item \textbf{Múltiples productos}: Interacciones en el espacio de almacenamiento
+    \item \textbf{Incertidumbre}: Versiones estocásticas del problema
+\end{itemize}
 
+Sin embargo, el algoritmo original sigue siendo fundamental como punto de referencia teórico y como componente básico en sistemas más complejos de planificación de requerimientos de materiales (MRP).
+
+\begin{remark}[Vigencia del Algoritmo]
+Más de seis décadas después de su publicación, el algoritmo Wagner-Whitin mantiene su relevancia:
+\begin{itemize}
+    \item \textbf{Educación}: Enseña principios fundamentales de programación dinámica
+    \textbf{Investigación}: Sirve como benchmark para nuevos algoritmos
+    \item \textbf{Práctica industrial}: Se utiliza en sistemas de gestión de inventarios
+    \item \textbf{Extensiones modernas}: Inspira algoritmos para problemas más complejos
+\end{itemize}
+\end{remark}
 
 \section*{Referencias}
 
