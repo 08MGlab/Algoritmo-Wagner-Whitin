@@ -16,7 +16,7 @@
 
 # Archivos de compilación y salida
 # Recomiendo ignorar el PDF, ya que se genera desde el .tex
-*.pdf
+.pdf
 
 # Carpetas de compilación
 _build/
