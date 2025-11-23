@@ -1,4 +1,4 @@
-# Wagner-Whitin-Algorithm
+# Algoritmo-Wagner-Whitin
 # Algoritmo Wagner-Whitin: Modelo Dinámico de Dimensionamiento de Lotes
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python)](https://python.org)
